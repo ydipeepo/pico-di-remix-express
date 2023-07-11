@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 
 import { broadcastDevReady, installGlobals } from "@remix-run/node";
-import { createRequestHandler as createRemixRequestHandler } from "@remix-run/express";
+import { createRequestHandler } from "@remix-run/express";
 import { createGetLoadContext, getProviderFromBuild } from "pico-di-remix-express";
 import { watch } from "chokidar";
 import compression from "compression";
@@ -19,7 +19,7 @@ const MODE = process.env.NODE_ENV;
  */
 let build = await import(BUILD_PATH);
 
-const createRequestHandler = () => {
+const createRequestHandlerAndProvider = () => {
 	let provider = getProviderFromBuild(build, MODE);
 	if (MODE === "development") {
 		const watcher = watch(BUILD_PATH, { ignoreInitial: true });
@@ -31,7 +31,7 @@ const createRequestHandler = () => {
 		});
 		return (req, res, next) => {
 			try {
-				return createRemixRequestHandler({
+				return createRequestHandler({
 					build,
 					getLoadContext: createGetLoadContext({
 						provider,
@@ -44,7 +44,7 @@ const createRequestHandler = () => {
 			}
 		};
 	} else {
-		return createRemixRequestHandler({
+		return createRequestHandler({
 			build,
 			getLoadContext: createGetLoadContext({
 				provider,
@@ -61,7 +61,7 @@ app.disable("x-powered-by");
 app.use("/build", express.static("public/build", { immutable: true, maxAge: "1y" }));
 app.use(express.static("public", { maxAge: "1h" }));
 app.use(morgan("tiny"));
-app.all("*", createRequestHandler());
+app.all("*", createRequestHandlerAndProvider());
 app.listen(PORT, () => {
 	console.log(`Express server listening on port ${PORT}`);
 	if (MODE === "development") {
