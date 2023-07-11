@@ -70,19 +70,19 @@ export {
 
 * [`example/app/services`](example/app/services)
 
-### `/app/entry.server.ts` の修正
+### `/app/entry.server.tsx` の修正
 
-  先ほどの `getProvider` という関数を `~/entry.server.ts` からエクスポートする必要があります。このエクスポートは `pico-di-remix-express` がサービスプロバイダを取得するために必要です。
+  先ほどの `getProvider` という関数を `~/entry.server.tsx` からエクスポートする必要があります。このエクスポートは `pico-di-remix-express` がサービスプロバイダを取得するために必要です。
 
 ```ts
-// /app/entry.server.ts
+// /app/entry.server.tsx
 
 export { getProvider } from "~/services";
 
 // ...
 ```
 
-* [`example/app/entry.server.ts`](example/app/entry.server.ts)
+* [`example/app/entry.server.tsx`](example/app/entry.server.tsx)
 
 ### `/server.js` の修正
 
