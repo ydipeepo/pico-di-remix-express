@@ -68,8 +68,7 @@ export {
 }
 ```
 
-* サービスとコンテキストは型をエクスポートします
-* [`pico-di`](https://github.com/ydipeepo/pico-di) により細かな説明があります
+* [`example/app/services`](example/app/services)
 
 ### `/app/entry.server.ts` の修正
 
@@ -82,6 +81,8 @@ export { getProvider } from "~/services";
 
 // ...
 ```
+
+* [`example/app/entry.server.ts`](example/app/entry.server.ts)
 
 ### `/server.js` の修正
 
