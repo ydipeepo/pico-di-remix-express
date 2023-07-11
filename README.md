@@ -83,47 +83,9 @@ export { getProvider } from "~/services";
 // ...
 ```
 
-### `/server.js` の修正 (`createRequestHandler` と `createDevRequestHandler` を使う方法)
+### `/server.js` の修正
 
-```ts
-import chokidar from "chokidar";
-import { createRequestHandler, createDevRequestHandler } from "pico-di-remix-express";
-
-// ...
-
-const BUILD_PATH = "./build/index.js";
-
-/**
- * @type { import('@remix-run/node').ServerBuild | Promise<import('@remix-run/node').ServerBuild> }
- */
-const build = await import(BUILD_PATH);
-
-// ...
-
-app.all("*", process.env.NODE_ENV === "development"
-	? createDevRequestHandler({
-		build,
-		watch(setBuild) {
-			const watcher = chokidar.watch(BUILD_PATH, { ignoreInitial: true });
-			watcher.on("all", async () => {
-				const stat = fs.statSync(BUILD_PATH);
-				const build = await import(BUILD_PATH + "?t=" + stat.mtimeMs);
-
-				// broadcastDevReady を呼ぶ必要がなければ
-				// 第二引数は false でよいです。
-				setBuild(build, true);
-			});
-		},
-	})
-	: createRequestHandler({
-		build,
-		mode: process.env.NODE_ENV,
-	}));
-```
-
-### `/server.js` の修正 (`getProviderFromBuild` と `createGetLoadContext` を使う方法)
-
-* [example/server.js](example/server.js)
+* [`example/server.js`](example/server.js)
 
 ### action / loader でサービスを使う
 
