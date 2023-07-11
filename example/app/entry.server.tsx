@@ -4,6 +4,8 @@ import { Response, type AppLoadContext, type EntryContext } from "@remix-run/nod
 import { RemixServer } from "@remix-run/react";
 import isBot from "isbot";
 
+// サーバービルドに getProvider のエクスポートを含めるため、
+// この行を追加しておく必要があります。
 export { getProvider } from "~/services";
 
 const ABORT_DELAY = 5_000;
