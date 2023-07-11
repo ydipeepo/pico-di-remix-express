@@ -123,69 +123,7 @@ app.all("*", process.env.NODE_ENV === "development"
 
 ### `/server.js` の修正 (`getProviderFromBuild` と `createGetLoadContext` を使う方法)
 
-```ts
-import { createRequestHandler as createRemixRequestHandler } from "@remix-run/express";
-import chokidar from "chokidar";
-import { getProviderFromBuild, createGetLoadContext } from "pico-di-remix-express";
-
-// ...
-
-const BUILD_PATH = "./build/index.js";
-
-/**
- * @type { import('@remix-run/node').ServerBuild | Promise<import('@remix-run/node').ServerBuild> }
- */
-const build = await import(BUILD_PATH);
-
-const createRequestHandler = ({
-	mode,
-	getLoadContext,
-	build,
-}) => {
-	let provider = getProviderFromBuild(build, mode);
-	if (mode === "development") {
-		const watcher = chokidar.watch(BUILD_PATH, { ignoreInitial: true });
-		watcher.on("all", async () => {
-			const stat = fs.statSync(BUILD_PATH);
-			build = await import(BUILD_PATH + "?t=" + stat.mtimeMs);
-			provider = getProviderFromBuild(build, mode);
-			broadcastDevReady(build);
-		});
-		return (req, res, next) => {
-			try {
-				return createRemixRequestHandler({
-					build,
-					getLoadContext: createGetLoadContext({
-						getLoadContext,
-						provider,
-						scopeName: "DevRequestScope",
-					}),
-					mode: "development",
-				})(req, res, next);
-			} catch (error) {
-				next(error);
-			}
-		};
-	} else {
-		return createRemixRequestHandler({
-			build,
-			getLoadContext: createGetLoadContext({
-				getLoadContext,
-				provider,
-				scopeName: "RequestScope",
-			}),
-			mode,
-		});
-	}
-};
-
-// ...
-
-app.all("*", createRequestHandler({
-	build,
-	mode: process.env.NODE_ENV,
-});
-```
+* [example/server.js](example/server.js)
 
 ### action / loader でサービスを使う
 

@@ -42,7 +42,9 @@ const createGetLoadContext = ({
 }) => async (request, response) => {
 	const exoticContext = await getLoadContext?.(request, response);
 	const scope = provider?.beginScope();
-	scope.name = scopeName ?? "RequestScope";
+	if (scope !== undefined) {
+		scope.name = scopeName ?? "RequestScope";
+	}
 	return scope?.createContext(exoticContext) ?? exoticContext;
 };
 
