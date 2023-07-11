@@ -9,12 +9,12 @@
 
   Adapter for using [`pico-di`](https://github.com/ydipeepo/pico-di) with Remix + express.
 
+  [![npm version](https://badge.fury.io/js/pico-di-remix-express.svg)](https://badge.fury.io/js/pico-di-remix-express)
+  [![Socket](https://socket.dev/api/badge/npm/package/pico-di-remix-express)](https://socket.dev/npm/package/pico-di-remix-express)
+
 ---
 
   [`pico-di`](https://github.com/ydipeepo/pico-di) を Remix + express 環境で使うためのアダプタです。
-
-  [![npm version](https://badge.fury.io/js/pico-di-remix-express.svg)](https://badge.fury.io/js/pico-di-remix-express)
-  [![Socket](https://socket.dev/api/badge/npm/package/pico-di-remix-express)](https://socket.dev/npm/package/pico-di-remix-express)
 
 ## Features
 
