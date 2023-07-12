@@ -5,95 +5,85 @@ import {
 	type LoaderFunction as RemixLoaderFunction,
 	type ActionArgs as RemixActionArgs,
 	type ActionFunction as RemixActionFunction,
+	type Request as RemixRequest,
 } from "@remix-run/node";
 import { type GetLoadContextFunction, type RequestHandler } from "@remix-run/express";
 import { type ServiceProvider, type ServiceRegistry } from "pico-di";
 
 /**
- * Represents a function to retrieve the provider.
+ * Represents a provider get function.
+ * @template Context Dependent context type.
  */
 type GetProviderFunction<Context> = {
-	(mode: "development" | "test" | "production"): ServiceProvider<Context>,
+	(mode: typeof process.env["NODE_ENV"]): ServiceProvider<Context>,
 };
 
 /**
- * Creates a `GetProviderFunction` function.
+ * Creates a provider get function.
+ * The created function must be exported from `entry.server`.
  * @param build Callback function that receives a builder and registers services into the registry.
+ * @template Context Dependent context type.
  */
 declare function createGetProvider<Context>(build: ServiceRegistry.BuildFunction<Context>): GetProviderFunction<Context>;
 
 /**
- * Gets the service provider from the server build.
- * @param build Server build.
- * @param mode Same value as environment variable NODE_ENV.
+ * Represents a function that sets the server build.
  */
-declare function getProviderFromBuild<Context>(build: ServerBuild, mode: "development" | "test" | "production"): ServiceProvider<Context> | null;
+type SetBuildFunction = {
+	(newBuild: ServerBuild): void,
+};
 
 /**
- * Creates a getLoadContext function that returns the dependent context.
+ * Represents a function (callback) that watches for server build changes.
  */
-declare function createGetLoadContext<Context>(init: {
-	/**
-	 * Service provider.
-	 */
-	provider: ServiceProvider<Context> | null,
-
-	/**
-	 * If this function is defined,
-	 * it is merged into the dependent context. (optional)
-	 */
-	getLoadContext?: GetLoadContextFunction,
-
-	/**
-	 * Scope name. (optional)
-	 */
-	scopeName?: string,
-}): GetLoadContextFunction;
+type WatchFunction = {
+	(setBuild: SetBuildFunction): void,
+};
 
 /**
  * Create a Remix request handler for express.
  */
 declare function createRequestHandler(init: {
 	/**
-	 * Same value as environment variable NODE_ENV.
+	 * Mode.
+	 * Same value as environment variable `process.env.NODE_ENV`.
 	 */
-	mode: "development" | "test" | "production",
+	mode: typeof process.env["NODE_ENV"],
 
 	/**
-	 * Server build.
+	 * Function to get load context. (optional)
+	 * If this function is defined, returned value is merged into the dependent context.
+	 */
+	getLoadContext?: GetLoadContextFunction,
+
+	/**
+	 * Initial server build.
 	 */
 	build: ServerBuild,
 
 	/**
-	 * If this function is defined,
-	 * it is merged into the dependent context. (optional)
+	 * Function that watches for server build changes and set it to the request handler.
+	 * This is only enabled in development mode.
 	 */
-	getLoadContext?: GetLoadContextFunction,
+	watch?: WatchFunction,
+
+	/**
+	 * Service scope name. (optional)
+	 */
+	scopeName?: string,
 }): RequestHandler;
 
 /**
- * Create a Remix dev request handler for express.
+ * Retrieves the service provider from the specified server build.
+ * @param build Server build.
+ * @param mode Mode. Same value as environment variable `process.env.NODE_ENV`.
+ * @template Context Dependent context type.
  */
-declare function createDevRequestHandler(init: {
-	/**
-	 * Server build.
-	 */
-	build: ServerBuild,
-
-	/**
-	 * Callback to notify reload of server build.
-	 */
-	watch?: (setBuild: (build: ServerBuild, broadcastReady: boolean) => void) => void,
-
-	/**
-	 * If this function is defined,
-	 * it is merged into the dependent context. (optional)
-	 */
-	getLoadContext?: GetLoadContextFunction,
-}): RequestHandler;
+declare function getProviderFromBuild<Context>(build: ServerBuild, mode: typeof process.env["NODE_ENV"]): ServiceProvider<Context> | null;
 
 /**
  * Represents a loader argument type that includes a dependent context type.
+ * @template Context Dependent context type.
  */
 type LoaderArgs<Context> = {
 	context: Context,
@@ -101,11 +91,13 @@ type LoaderArgs<Context> = {
 
 /**
  * Represents a loader function type that includes a dependent context type.
+ * @template Context Dependent context type.
  */
 type LoaderFunction<Context> = (args: LoaderArgs<Context>) => ReturnType<RemixLoaderFunction>;
 
 /**
  * Represents an action argument type that includes a dependent context type.
+ * @template Context Dependent context type.
  */
 type ActionArgs<Context> = {
 	context: Context,
@@ -113,23 +105,38 @@ type ActionArgs<Context> = {
 
 /**
  * Represents an action function type that includes a dependent context type.
+ * @template Context Dependent context type.
  */
 type ActionFunction<Context> = (args: ActionArgs<Context>) => ReturnType<RemixActionFunction>;
 
-//
-// Helpers (testing)
-//
-
-// TODO: docs
-
+/**
+ * Creates new context type merged with Remix request `request`.
+ * @template Context Dependent context type.
+ */
 type WithRequest<Context> = {
-	request: Request,
+	request: RemixRequest,
 } & Context;
 
-type WithResponse<Context> = {
-	response: Response,
+/**
+ * Creates new context type merged with express request `req`.
+ * @template Context Dependent context type.
+ */
+type WithReq<Context> = {
+	req: Request,
 } & Context;
 
+/**
+ * Creates new context type merged with express response `res`.
+ * @template Context Dependent context type.
+ */
+type WithRes<Context> = {
+	req: Response,
+} & Context;
+
+/**
+ * Creates new context type merged with `process.env` `env`.
+ * @template Context Dependent context type.
+ */
 type WithEnv<Context> = {
 	env: typeof process["env"],
 } & Context;
@@ -137,16 +144,16 @@ type WithEnv<Context> = {
 export {
 	createGetProvider,
 	createRequestHandler,
-	createDevRequestHandler,
-	createGetLoadContext,
-	// getDefaultLoadContext,
 	getProviderFromBuild,
 	type GetProviderFunction,
+	type SetBuildFunction,
+	type WatchFunction,
 	type LoaderArgs,
 	type LoaderFunction,
 	type ActionArgs,
 	type ActionFunction,
 	type WithRequest,
-	type WithResponse,
+	type WithReq,
+	type WithRes,
 	type WithEnv,
 }
