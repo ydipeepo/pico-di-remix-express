@@ -1,7 +1,7 @@
 {
 	"name": "pico-di-remix-express",
 	"description": "Adapter for using pico-di with Remix + express.",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"author": "Ydi",
 	"keywords": [
 		"di",
@@ -32,7 +32,6 @@
 		"test-lint": "eslint index.d.ts index.js"
 	},
 	"devDependencies": {
-		"@types/node": "^18.11.18",
 		"@typescript-eslint/eslint-plugin": "^5.50.0",
 		"@typescript-eslint/parser": "^5.50.0",
 		"eslint": "^8.33.0",
