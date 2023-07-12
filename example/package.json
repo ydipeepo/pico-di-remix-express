@@ -19,7 +19,7 @@
 		"isbot": "^3.6.8",
 		"morgan": "^1.10.0",
 		"pico-di": "^0.1.0",
-		"pico-di-remix-express": "^0.1.2",
+		"pico-di-remix-express": "^0.1.3",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
