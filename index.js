@@ -35,17 +35,20 @@ const getProviderFromBuild = (build, mode) => {
 	return null;
 };
 
+const getDefaultLoadContext = (request, response) => ({ env: process.env, request, response });
+
 const createGetLoadContext = ({
 	provider,
-	getLoadContext,
-	scopeName,
+	getLoadContext = getDefaultLoadContext,
+	scopeName = "RequestScope",
 }) => async (request, response) => {
-	const exoticContext = await getLoadContext?.(request, response);
-	const scope = provider?.beginScope();
-	if (scope !== undefined) {
-		scope.name = scopeName ?? "RequestScope";
+	let loadContext = await getLoadContext(request, response);
+	if (provider !== undefined) {
+		const scope = provider.beginScope();
+		scope.name = scopeName;
+		loadContext = scope.createContext(loadContext);
 	}
-	return scope?.createContext(exoticContext) ?? exoticContext;
+	return loadContext;
 };
 
 const createRequestHandler = ({
@@ -96,8 +99,9 @@ const createDevRequestHandler = ({
 
 module.exports = {
 	createGetProvider,
-	getProviderFromBuild,
 	createGetLoadContext,
 	createRequestHandler,
 	createDevRequestHandler,
+	getProviderFromBuild,
+	getDefaultLoadContext,
 };

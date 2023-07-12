@@ -1,3 +1,4 @@
+import { type Request, type Response } from "express";
 import {
 	type ServerBuild,
 	type LoaderArgs as RemixLoaderArgs,
@@ -115,15 +116,37 @@ type ActionArgs<Context> = {
  */
 type ActionFunction<Context> = (args: ActionArgs<Context>) => ReturnType<RemixActionFunction>;
 
+//
+// Helpers (testing)
+//
+
+// TODO: docs
+
+type WithRequest<Context> = {
+	request: Request,
+} & Context;
+
+type WithResponse<Context> = {
+	response: Response,
+} & Context;
+
+type WithEnv<Context> = {
+	env: typeof process["env"],
+} & Context;
+
 export {
 	createGetProvider,
 	createRequestHandler,
 	createDevRequestHandler,
 	createGetLoadContext,
+	// getDefaultLoadContext,
 	getProviderFromBuild,
 	type GetProviderFunction,
 	type LoaderArgs,
 	type LoaderFunction,
 	type ActionArgs,
 	type ActionFunction,
+	type WithRequest,
+	type WithResponse,
+	type WithEnv,
 }
