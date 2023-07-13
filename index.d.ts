@@ -19,12 +19,33 @@ type GetProviderFunction<Context> = {
 };
 
 /**
+ * Represents an additional dependent context for Remix.
+ */
+type RemixContext = {
+	request: RemixRequest,
+	req: Request,
+	res: Response,
+	env: typeof process.env,
+};
+
+/**
+ * Creates new context type merged with the additional dependent context.
+ * @template Context Dependent context type.
+ */
+type WithRemix<Context> = Context & RemixContext;
+
+/**
+ * Create new context names type that excludes additional context.
+ */
+type WithoutRemixName<Context, Name extends keyof Context = keyof Context> = Exclude<Name, keyof RemixContext>;
+
+/**
  * Creates a provider get function.
  * The created function must be exported from `entry.server`.
  * @param build Callback function that receives a builder and registers services into the registry.
  * @template Context Dependent context type.
  */
-declare function createGetProvider<Context>(build: ServiceRegistry.BuildFunction<Context>): GetProviderFunction<Context>;
+declare function createGetProvider<Context>(build: ServiceRegistry.BuildFunction<Context, WithoutRemixName<Context>>): GetProviderFunction<Context>;
 
 /**
  * Represents a function that sets the server build.
@@ -109,38 +130,6 @@ type ActionArgs<Context> = {
  */
 type ActionFunction<Context> = (args: ActionArgs<Context>) => ReturnType<RemixActionFunction>;
 
-/**
- * Creates new context type merged with Remix request `request`.
- * @template Context Dependent context type.
- */
-type WithRequest<Context> = {
-	request: RemixRequest,
-} & Context;
-
-/**
- * Creates new context type merged with express request `req`.
- * @template Context Dependent context type.
- */
-type WithReq<Context> = {
-	req: Request,
-} & Context;
-
-/**
- * Creates new context type merged with express response `res`.
- * @template Context Dependent context type.
- */
-type WithRes<Context> = {
-	req: Response,
-} & Context;
-
-/**
- * Creates new context type merged with `process.env` `env`.
- * @template Context Dependent context type.
- */
-type WithEnv<Context> = {
-	env: typeof process["env"],
-} & Context;
-
 export {
 	createGetProvider,
 	createRequestHandler,
@@ -152,8 +141,6 @@ export {
 	type LoaderFunction,
 	type ActionArgs,
 	type ActionFunction,
-	type WithRequest,
-	type WithReq,
-	type WithRes,
-	type WithEnv,
+	type WithRemix,
+	type WithoutRemixName,
 }
