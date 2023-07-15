@@ -1,7 +1,7 @@
 {
 	"name": "pico-di-remix-express",
 	"description": "Adapter for using pico-di with Remix + express.",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"author": "Ydi",
 	"keywords": [
 		"di",

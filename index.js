@@ -77,13 +77,15 @@ const createRequestHandler = ({
 	watch,
 	scopeName = "RequestScope",
 }) => {
-	const handleRequest = createRemixRequestHandler(build, mode);
-	let provider = getProviderFromBuild(build, mode);
+	let handleRequest;
+	let provider;
+	const setBuild = build => {
+		handleRequest = createRemixRequestHandler(build, mode);
+		provider = getProviderFromBuild(build, mode);
+	};
+	setBuild(build);
 	if (watch !== undefined && mode === "development") {
-		watch(newBuild => {
-			build = newBuild;
-			provider = getProviderFromBuild(build, mode);
-		});
+		watch(setBuild);
 	}
 	return async (req, res, next) => {
 		try {
