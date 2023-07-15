@@ -89,7 +89,7 @@ const createRequestHandler = ({
 		try {
 			const request = createRemixRequest(req, res);
 			let loadContext = await getLoadContext(req, res);
-			if (provider !== undefined) {
+			if (provider) {
 				const scope = provider.beginScope();
 				scope.name = scopeName;
 				loadContext = scope.createContext({
