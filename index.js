@@ -77,18 +77,21 @@ const createRequestHandler = ({
 	watch,
 	scopeName = "RequestScope",
 }) => {
-	let handleRequest;
-	let provider;
-	const setBuild = build => {
-		handleRequest = createRemixRequestHandler(build, mode);
-		provider = getProviderFromBuild(build, mode);
-	};
-	setBuild(build);
+	let handleRequest = createRemixRequestHandler(build, mode);
+	let provider = getProviderFromBuild(build, mode);
+	build = undefined;
 	if (watch !== undefined && mode === "development") {
-		watch(setBuild);
+		watch(nextBuild => build = nextBuild);
 	}
 	return async (req, res, next) => {
 		try {
+			if (build) {
+				const nextHandleRequest = createRemixRequestHandler(build, mode);
+				const nextProvider = getProviderFromBuild(build, mode);
+				handleRequest = nextHandleRequest;
+				provider = nextProvider;
+				build = undefined;
+			}
 			const request = createRemixRequest(req, res);
 			let loadContext = await getLoadContext(req, res);
 			if (provider) {
