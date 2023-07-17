@@ -50,15 +50,15 @@ declare function createGetProvider<Context>(build: ServiceRegistry.BuildFunction
 /**
  * Represents a function that sets the server build.
  */
-type SetNextBuildFunction = {
-	(nextBuild: ServerBuild): void,
+type SetBuildFunction = {
+	(build: ServerBuild): void,
 };
 
 /**
  * Represents a function (callback) that watches for server build changes.
  */
 type WatchFunction = {
-	(setNextBuild: SetNextBuildFunction): void,
+	(setBuild: SetBuildFunction): void,
 };
 
 /**
@@ -135,7 +135,7 @@ export {
 	createRequestHandler,
 	getProviderFromBuild,
 	type GetProviderFunction,
-	type SetNextBuildFunction,
+	type SetBuildFunction,
 	type WatchFunction,
 	type LoaderArgs,
 	type LoaderFunction,

@@ -80,30 +80,44 @@ const createRequestHandler = ({
 	let handleRequest = createRemixRequestHandler(build, mode);
 	let provider = getProviderFromBuild(build, mode);
 	build = undefined;
-	if (watch !== undefined && mode === "development") {
-		watch(nextBuild => build = nextBuild);
+	if (watch && mode === "development") {
+		const buildQueue = [];
+		watch(nextBuild => void buildQueue.push(nextBuild));
+		return async (req, res, next) => {
+			try {
+				while (buildQueue.length) {
+					const build = buildQueue.shift();
+					try {
+						handleRequest = createRemixRequestHandler(build, mode);
+						provider = getProviderFromBuild(build, mode);
+					} catch (error) {
+						handleRequest = undefined;
+						provider = undefined;
+						throw error;
+					}
+				}
+				const request = createRemixRequest(req, res);
+				let loadContext = await getLoadContext(req, res);
+				if (provider) {
+					const scope = provider.beginScope();
+					scope.name = scopeName;
+					loadContext = scope.createContext({ ...loadContext, request });
+				}
+				const response = await handleRequest(request, loadContext);
+				await sendRemixResponse(res, response);
+			} catch (error) {
+				next(error);
+			}
+		};
 	}
 	return async (req, res, next) => {
 		try {
-			if (build) {
-				const nextHandleRequest = createRemixRequestHandler(build, mode);
-				const nextProvider = getProviderFromBuild(build, mode);
-				handleRequest = nextHandleRequest;
-				provider = nextProvider;
-				build = undefined;
-			}
 			const request = createRemixRequest(req, res);
 			let loadContext = await getLoadContext(req, res);
 			if (provider) {
 				const scope = provider.beginScope();
 				scope.name = scopeName;
-				loadContext = scope.createContext({
-					...loadContext,
-					// env: process.env,
-					// req,
-					// res,
-					request,
-				});
+				loadContext = scope.createContext({ ...loadContext, request });
 			}
 			const response = await handleRequest(request, loadContext);
 			await sendRemixResponse(res, response);
